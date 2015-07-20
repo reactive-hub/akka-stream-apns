@@ -5,6 +5,12 @@ Akka-stream-apns is an [Apple Push Notification Service](https://developer.apple
 
 ## Quick Start
 
+```scala
+resolvers += Resolver.bintrayRepo("reactivehub", "maven")
+
+libraryDependencies += "com.reactivehub" %% "akka-stream-apns" % "0.1"
+```
+
 To use the connector, you need a [push notification client SSL certificate](https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/ConfiguringPushNotifications/ConfiguringPushNotifications.html)
 and a [device token](https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/IPhoneOSClientImp.html).
 
