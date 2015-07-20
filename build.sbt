@@ -1,3 +1,4 @@
+import Dependencies._
 import sbt.Keys._
 import scalariform.formatter.preferences._
 
@@ -22,17 +23,12 @@ lazy val connector = (project in file("connector"))
   .settings(commonSettings)
   .settings(
     name := "akka-stream-apns",
-    libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-stream-experimental" % "1.0",
-      "io.spray"          %% "spray-json"               % "1.3.2" % "provided",
-      "com.typesafe.play" %% "play-json"                % "2.3.9" % "provided",
-      "net.liftweb"       %% "lift-json"                % "2.6.2" % "provided"
-    )
+    libraryDependencies ++= connectorDeps
   )
 
 lazy val examples = (project in file("examples"))
   .dependsOn(connector)
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "io.spray" %% "spray-json" % "1.3.2"
+    libraryDependencies ++= examplesDeps
   )
