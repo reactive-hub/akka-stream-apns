@@ -12,7 +12,7 @@ lazy val commonSettings = scalariformSettings ++ Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(connector)
+  .aggregate(connector, examples)
   .settings(commonSettings)
   .settings(
     name := "akka-stream-apns-root"
@@ -28,4 +28,11 @@ lazy val connector = (project in file("connector"))
       "com.typesafe.play" %% "play-json"                % "2.3.9" % "provided",
       "net.liftweb"       %% "lift-json"                % "2.6.2" % "provided"
     )
+  )
+
+lazy val examples = (project in file("examples"))
+  .dependsOn(connector)
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies += "io.spray" %% "spray-json" % "1.3.2"
   )
