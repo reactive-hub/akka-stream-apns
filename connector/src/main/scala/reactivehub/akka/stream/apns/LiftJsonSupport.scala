@@ -5,9 +5,7 @@ import net.liftweb.json._
 import scala.language.implicitConversions
 
 trait LiftJsonSupport {
-  class LiftWriter[T](implicit f: Formats) {
-    def write(t: T): JValue = Extraction.decompose(t)
-  }
+  import LiftJsonSupport.LiftWriter
 
   implicit object LiftJsonPayloadMarshaller extends PayloadMarshaller {
     override type Node = JValue
@@ -21,4 +19,10 @@ trait LiftJsonSupport {
   }
 
   implicit def liftWriter[T](implicit f: Formats): LiftWriter[T] = new LiftWriter[T]
+}
+
+object LiftJsonSupport {
+  class LiftWriter[T](implicit f: Formats) {
+    def write(t: T): JValue = Extraction.decompose(t)
+  }
 }
