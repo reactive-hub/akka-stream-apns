@@ -1,10 +1,10 @@
-package reactivehub.akka.stream.apns
+package reactivehub.akka.stream.apns.marshallers
 
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.jawn.JawnParser
 import org.scalatest.{ FlatSpec, Matchers }
-import reactivehub.akka.stream.apns.MarshallerBehaviours.Custom
+import reactivehub.akka.stream.apns.marshallers.MarshallerBehaviours.Custom
 
 class CircePayloadMarshallerSpec extends FlatSpec with Matchers with MarshallerBehaviours with CirceSupport {
   override val m = CircePayloadMarshaller

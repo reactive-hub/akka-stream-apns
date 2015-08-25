@@ -1,6 +1,7 @@
-package reactivehub.akka.stream.apns
+package reactivehub.akka.stream.apns.marshallers
 
 import akka.util.ByteString
+import reactivehub.akka.stream.apns.PayloadMarshaller
 import spray.json._
 
 trait SprayJsonSupport {

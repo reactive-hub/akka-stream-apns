@@ -1,7 +1,8 @@
-package reactivehub.akka.stream.apns
+package reactivehub.akka.stream.apns.marshallers
 
 import akka.util.ByteString
 import net.liftweb.json._
+import reactivehub.akka.stream.apns.PayloadMarshaller
 import scala.language.implicitConversions
 
 trait LiftJsonSupport {

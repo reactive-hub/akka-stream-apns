@@ -6,6 +6,7 @@ import akka.stream.scaladsl.Source
 import reactivehub.akka.stream.apns.Environment.Sandbox
 import reactivehub.akka.stream.apns.TlsUtil.loadPkcs12FromResource
 import reactivehub.akka.stream.apns._
+import reactivehub.akka.stream.apns.marshallers.SprayJsonSupport
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 

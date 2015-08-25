@@ -1,7 +1,8 @@
-package reactivehub.akka.stream.apns
+package reactivehub.akka.stream.apns.marshallers
 
 import akka.util.ByteString
 import play.api.libs.json._
+import reactivehub.akka.stream.apns.PayloadMarshaller
 
 trait PlayJsonSupport {
   implicit object PlayJsonPayloadMarshaller extends PayloadMarshaller {

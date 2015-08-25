@@ -1,8 +1,8 @@
-package reactivehub.akka.stream.apns
+package reactivehub.akka.stream.apns.marshallers
 
 import net.liftweb.json.{ parse ⇒ liftParse, _ }
 import org.scalatest.{ FlatSpec, Matchers }
-import reactivehub.akka.stream.apns.MarshallerBehaviours.Custom
+import reactivehub.akka.stream.apns.marshallers.MarshallerBehaviours.Custom
 
 class LiftJsonPayloadMarshallerSpec extends FlatSpec with Matchers with MarshallerBehaviours with LiftJsonSupport {
   override val m = LiftJsonPayloadMarshaller

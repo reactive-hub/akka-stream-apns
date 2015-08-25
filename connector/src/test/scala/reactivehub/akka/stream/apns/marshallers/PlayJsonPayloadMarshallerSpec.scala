@@ -1,8 +1,8 @@
-package reactivehub.akka.stream.apns
+package reactivehub.akka.stream.apns.marshallers
 
 import org.scalatest.{ FlatSpec, Matchers }
 import play.api.libs.json.{ JsValue, Json }
-import reactivehub.akka.stream.apns.MarshallerBehaviours.Custom
+import reactivehub.akka.stream.apns.marshallers.MarshallerBehaviours.Custom
 
 class PlayJsonPayloadMarshallerSpec extends FlatSpec with Matchers with MarshallerBehaviours with PlayJsonSupport {
   override val m = PlayJsonPayloadMarshaller

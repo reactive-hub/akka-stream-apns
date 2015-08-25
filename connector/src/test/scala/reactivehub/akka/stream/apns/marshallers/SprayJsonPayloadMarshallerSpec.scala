@@ -1,7 +1,7 @@
-package reactivehub.akka.stream.apns
+package reactivehub.akka.stream.apns.marshallers
 
 import org.scalatest.{ FlatSpec, Matchers }
-import reactivehub.akka.stream.apns.MarshallerBehaviours.Custom
+import reactivehub.akka.stream.apns.marshallers.MarshallerBehaviours.Custom
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 

@@ -1,6 +1,7 @@
-package reactivehub.akka.stream.apns
+package reactivehub.akka.stream.apns.marshallers
 
 import org.scalatest.{ FlatSpec, Matchers }
+import reactivehub.akka.stream.apns.PayloadMarshaller
 
 trait MarshallerBehaviours {
   this: FlatSpec with Matchers ⇒

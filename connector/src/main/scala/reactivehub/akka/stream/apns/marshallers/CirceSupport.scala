@@ -1,7 +1,8 @@
-package reactivehub.akka.stream.apns
+package reactivehub.akka.stream.apns.marshallers
 
 import akka.util.ByteString
 import io.circe._
+import reactivehub.akka.stream.apns.PayloadMarshaller
 
 trait CirceSupport {
   implicit object CircePayloadMarshaller extends PayloadMarshaller {
