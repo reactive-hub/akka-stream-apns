@@ -26,17 +26,17 @@ class ApnsExt(implicit system: ExtendedActorSystem) extends Extension {
   def notificationService(address: InetSocketAddress, sslContext: SSLContext): Flow[Notification, Error, Unit] =
     NotificationStage().atop(tlsStage(sslContext)).join(transportFlow(address))
 
-  def feedbackService(sslContext: SSLContext): Source[Feedback, Promise[Unit]] =
+  def feedbackService(sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
     feedbackService(Production, sslContext)
 
-  def feedbackService(environment: Environment, sslContext: SSLContext): Source[Feedback, Promise[Unit]] =
+  def feedbackService(environment: Environment, sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
     feedbackService(environment.feedback, sslContext)
 
-  def feedbackService(host: String, port: Int, sslContext: SSLContext): Source[Feedback, Promise[Unit]] =
+  def feedbackService(host: String, port: Int, sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
     feedbackService(new InetSocketAddress(host, port), sslContext)
 
-  def feedbackService(address: InetSocketAddress, sslContext: SSLContext): Source[Feedback, Promise[Unit]] =
-    Source.lazyEmpty[ByteString].via(FeedbackStage().atop(tlsStage(sslContext)).join(transportFlow(address)))
+  def feedbackService(address: InetSocketAddress, sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
+    Source.maybe[ByteString].via(FeedbackStage().atop(tlsStage(sslContext)).join(transportFlow(address)))
 
   private def tlsStage(sslContext: SSLContext) = SslTls(sslContext, NegotiateNewSession.withDefaults, Client)
 
@@ -48,14 +48,14 @@ object ApnsExt extends ExtensionKey[ApnsExt]
 private[apns] object NotificationStage {
   implicit val _ = ByteOrder.BIG_ENDIAN
 
-  def apply(): BidiFlow[Notification, SslTlsOutbound, SslTlsInbound, Error, Unit] = BidiFlow() { b ⇒
+  def apply(): BidiFlow[Notification, SslTlsOutbound, SslTlsInbound, Error, Unit] = BidiFlow.fromGraph(GraphDSL.create() { b ⇒
     val out = b.add(Flow[Notification].map(renderNotification).map(SendBytes))
     val in = b.add(Flow[SslTlsInbound]
       .collect({ case SessionBytes(_, bytes) ⇒ bytes })
       .transform(() ⇒ new ErrorFraming)
       .map(parseError))
-    BidiShape(out, in)
-  }
+    BidiShape.fromFlows(out, in)
+  })
 
   def renderNotification(notification: Notification): ByteString = {
     def renderDeviceToken(builder: ByteStringBuilder, deviceToken: DeviceToken): Unit = {
@@ -156,14 +156,14 @@ private[apns] object NotificationStage {
 private[apns] object FeedbackStage {
   implicit val _ = ByteOrder.BIG_ENDIAN
 
-  def apply(): BidiFlow[ByteString, SslTlsOutbound, SslTlsInbound, Feedback, Unit] = BidiFlow() { b ⇒
+  def apply(): BidiFlow[ByteString, SslTlsOutbound, SslTlsInbound, Feedback, Unit] = BidiFlow.fromGraph(GraphDSL.create() { b ⇒
     val out = b.add(Flow[ByteString].map(SendBytes))
     val in = b.add(Flow[SslTlsInbound]
       .collect({ case SessionBytes(_, bytes) ⇒ bytes })
       .transform(() ⇒ new FeedbackFraming)
       .map(parseFeedback))
-    BidiShape(out, in)
-  }
+    BidiShape.fromFlows(out, in)
+  })
 
   class FeedbackFraming extends PushPullStage[ByteString, ByteString] {
     var stash = ByteString.empty
