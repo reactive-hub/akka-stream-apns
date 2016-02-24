@@ -1,10 +1,11 @@
 package reactivehub.akka.stream.apns
 
+import akka.NotUsed
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionKey}
-import akka.stream.BidiShape
-import akka.stream.io._
+import akka.stream.TLSProtocol._
 import akka.stream.scaladsl._
 import akka.stream.stage.{Context, PushPullStage, SyncDirective, TerminationDirective}
+import akka.stream.{BidiShape, Client}
 import akka.util.{ByteString, ByteStringBuilder}
 import java.net.InetSocketAddress
 import java.nio.ByteOrder
@@ -14,16 +15,16 @@ import reactivehub.akka.stream.apns.ErrorStatus._
 import scala.concurrent.Promise
 
 class ApnsExt(implicit system: ExtendedActorSystem) extends Extension {
-  def notificationService(sslContext: SSLContext): Flow[Notification, Error, Unit] =
+  def notificationService(sslContext: SSLContext): Flow[Notification, Error, NotUsed] =
     notificationService(Production, sslContext)
 
-  def notificationService(environment: Environment, sslContext: SSLContext): Flow[Notification, Error, Unit] =
+  def notificationService(environment: Environment, sslContext: SSLContext): Flow[Notification, Error, NotUsed] =
     notificationService(environment.gateway, sslContext)
 
-  def notificationService(host: String, port: Int, sslContext: SSLContext): Flow[Notification, Error, Unit] =
+  def notificationService(host: String, port: Int, sslContext: SSLContext): Flow[Notification, Error, NotUsed] =
     notificationService(new InetSocketAddress(host, port), sslContext)
 
-  def notificationService(address: InetSocketAddress, sslContext: SSLContext): Flow[Notification, Error, Unit] =
+  def notificationService(address: InetSocketAddress, sslContext: SSLContext): Flow[Notification, Error, NotUsed] =
     NotificationStage().atop(tlsStage(sslContext)).join(transportFlow(address))
 
   def feedbackService(sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
@@ -38,7 +39,7 @@ class ApnsExt(implicit system: ExtendedActorSystem) extends Extension {
   def feedbackService(address: InetSocketAddress, sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
     Source.maybe[ByteString].via(FeedbackStage().atop(tlsStage(sslContext)).join(transportFlow(address)))
 
-  private def tlsStage(sslContext: SSLContext) = SslTls(sslContext, NegotiateNewSession.withDefaults, Client)
+  private def tlsStage(sslContext: SSLContext) = TLS(sslContext, NegotiateNewSession.withDefaults, Client)
 
   private def transportFlow(address: InetSocketAddress) = Tcp().outgoingConnection(address)
 }
@@ -48,7 +49,7 @@ object ApnsExt extends ExtensionKey[ApnsExt]
 private[apns] object NotificationStage {
   implicit val _ = ByteOrder.BIG_ENDIAN
 
-  def apply(): BidiFlow[Notification, SslTlsOutbound, SslTlsInbound, Error, Unit] = BidiFlow.fromGraph(GraphDSL.create() { b ⇒
+  def apply(): BidiFlow[Notification, SslTlsOutbound, SslTlsInbound, Error, NotUsed] = BidiFlow.fromGraph(GraphDSL.create() { b ⇒
     val out = b.add(Flow[Notification].map(renderNotification).map(SendBytes))
     val in = b.add(Flow[SslTlsInbound]
       .collect({ case SessionBytes(_, bytes) ⇒ bytes })
@@ -156,7 +157,7 @@ private[apns] object NotificationStage {
 private[apns] object FeedbackStage {
   implicit val _ = ByteOrder.BIG_ENDIAN
 
-  def apply(): BidiFlow[ByteString, SslTlsOutbound, SslTlsInbound, Feedback, Unit] = BidiFlow.fromGraph(GraphDSL.create() { b ⇒
+  def apply(): BidiFlow[ByteString, SslTlsOutbound, SslTlsInbound, Feedback, NotUsed] = BidiFlow.fromGraph(GraphDSL.create() { b ⇒
     val out = b.add(Flow[ByteString].map(SendBytes))
     val in = b.add(Flow[SslTlsInbound]
       .collect({ case SessionBytes(_, bytes) ⇒ bytes })
