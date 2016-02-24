@@ -4,8 +4,8 @@ import akka.NotUsed
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionKey}
 import akka.stream.TLSProtocol._
 import akka.stream.scaladsl._
-import akka.stream.stage.{Context, PushPullStage, SyncDirective, TerminationDirective}
-import akka.stream.{BidiShape, Client}
+import akka.stream.stage._
+import akka.stream._
 import akka.util.{ByteString, ByteStringBuilder}
 import java.net.InetSocketAddress
 import java.nio.ByteOrder
@@ -53,7 +53,7 @@ private[apns] object NotificationStage {
     val out = b.add(Flow[Notification].map(renderNotification).map(SendBytes))
     val in = b.add(Flow[SslTlsInbound]
       .collect({ case SessionBytes(_, bytes) ⇒ bytes })
-      .transform(() ⇒ new ErrorFraming)
+      .via(new ErrorFraming)
       .map(parseError))
     BidiShape.fromFlows(out, in)
   })
@@ -108,27 +108,45 @@ private[apns] object NotificationStage {
     frame.result()
   }
 
-  class ErrorFraming extends PushPullStage[ByteString, ByteString] {
-    var stash = ByteString.empty
+  class ErrorFraming extends GraphStage[FlowShape[ByteString, ByteString]] {
+    import ErrorFraming.frameLength
 
-    override def onPush(elem: ByteString, ctx: Context[ByteString]): SyncDirective = {
-      stash ++= elem
-      pushOrPull(ctx)
+    val in = Inlet[ByteString]("ErrorFraming.in")
+    val out = Outlet[ByteString]("ErrorFraming.out")
+
+    override val shape = FlowShape.of(in, out)
+
+    override def createLogic(attr: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
+      var stash = ByteString.empty
+
+      setHandler(in, new InHandler {
+        override def onPush(): Unit = {
+          stash ++= grab(in)
+          pushOrPull()
+        }
+
+        override def onUpstreamFinish(): Unit = {
+          emitMultiple(out, stash.grouped(frameLength).filter(_.size == frameLength))
+          complete(out)
+        }
+      })
+
+      setHandler(out, new OutHandler {
+        override def onPull(): Unit = pushOrPull()
+      })
+
+      private def pushOrPull(): Unit = {
+        if (stash.size >= frameLength) {
+          val frame = stash.take(frameLength)
+          stash = stash.drop(frameLength)
+          push(out, frame)
+        } else pull(in)
+      }
     }
+  }
 
-    override def onPull(ctx: Context[ByteString]): SyncDirective = pushOrPull(ctx)
-
-    override def onUpstreamFinish(ctx: Context[ByteString]): TerminationDirective =
-      if (stash.isEmpty) ctx.finish() else ctx.absorbTermination()
-
-    private def pushOrPull(ctx: Context[ByteString]): SyncDirective =
-      if (stash.size >= 6) {
-        val frame = stash.take(6)
-        stash = stash.drop(6)
-        ctx.push(frame)
-      } else pullOrFinish(ctx)
-
-    private def pullOrFinish(ctx: Context[ByteString]) = if (ctx.isFinishing) ctx.finish() else ctx.pull()
+  object ErrorFraming {
+    val frameLength = 6
   }
 
   def parseError(response: ByteString): Error = {
@@ -155,47 +173,16 @@ private[apns] object NotificationStage {
 }
 
 private[apns] object FeedbackStage {
-  implicit val _ = ByteOrder.BIG_ENDIAN
+  implicit val byteOrder = ByteOrder.BIG_ENDIAN
 
   def apply(): BidiFlow[ByteString, SslTlsOutbound, SslTlsInbound, Feedback, NotUsed] = BidiFlow.fromGraph(GraphDSL.create() { b ⇒
     val out = b.add(Flow[ByteString].map(SendBytes))
     val in = b.add(Flow[SslTlsInbound]
       .collect({ case SessionBytes(_, bytes) ⇒ bytes })
-      .transform(() ⇒ new FeedbackFraming)
+      .via(Framing.lengthField(fieldLength = 2, fieldOffset = 4, maximumFrameLength = 2 << 16 + 4 + 2, byteOrder))
       .map(parseFeedback))
     BidiShape.fromFlows(out, in)
   })
-
-  class FeedbackFraming extends PushPullStage[ByteString, ByteString] {
-    var stash = ByteString.empty
-    var need = -1
-
-    override def onPush(elem: ByteString, ctx: Context[ByteString]): SyncDirective = {
-      stash ++= elem
-      pushOrPull(ctx)
-    }
-
-    override def onPull(ctx: Context[ByteString]): SyncDirective = pushOrPull(ctx)
-
-    override def onUpstreamFinish(ctx: Context[ByteString]): TerminationDirective =
-      if (stash.isEmpty) ctx.finish() else ctx.absorbTermination()
-
-    private def pushOrPull(ctx: Context[ByteString]): SyncDirective =
-      if (need == -1) {
-        if (stash.size >= 6) {
-          val tokenLength = stash.drop(4).iterator.getShort
-          need = 6 + tokenLength
-          pushOrPull(ctx)
-        } else pullOrFinish(ctx)
-      } else if (stash.size >= need) {
-        val frame = stash.take(need)
-        stash = stash.drop(need)
-        need = -1
-        ctx.push(frame)
-      } else pullOrFinish(ctx)
-
-    private def pullOrFinish(ctx: Context[ByteString]) = if (ctx.isFinishing) ctx.finish() else ctx.pull()
-  }
 
   def parseFeedback(response: ByteString): Feedback = {
     val bytes = response.iterator
