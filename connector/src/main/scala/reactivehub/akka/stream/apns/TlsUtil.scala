@@ -2,8 +2,8 @@ package reactivehub.akka.stream.apns
 
 import akka.util.ByteString
 import java.io.InputStream
-import java.security.{ KeyStore, SecureRandom }
-import javax.net.ssl.{ KeyManagerFactory, SSLContext, TrustManagerFactory }
+import java.security.{KeyStore, SecureRandom}
+import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 import scala.util.control.NonFatal
 
 object TlsUtil {

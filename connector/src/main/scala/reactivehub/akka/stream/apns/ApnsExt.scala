@@ -1,11 +1,11 @@
 package reactivehub.akka.stream.apns
 
-import akka.actor.{ ExtendedActorSystem, Extension, ExtensionKey }
+import akka.actor.{ExtendedActorSystem, Extension, ExtensionKey}
 import akka.stream.BidiShape
 import akka.stream.io._
 import akka.stream.scaladsl._
-import akka.stream.stage.{ Context, PushPullStage, SyncDirective, TerminationDirective }
-import akka.util.{ ByteString, ByteStringBuilder }
+import akka.stream.stage.{Context, PushPullStage, SyncDirective, TerminationDirective}
+import akka.util.{ByteString, ByteStringBuilder}
 import java.net.InetSocketAddress
 import java.nio.ByteOrder
 import javax.net.ssl.SSLContext

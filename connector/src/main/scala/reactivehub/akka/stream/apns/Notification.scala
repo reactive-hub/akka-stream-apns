@@ -3,10 +3,14 @@ package reactivehub.akka.stream.apns
 import akka.util.ByteString
 import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration._
-import scala.language.{ higherKinds, implicitConversions }
+import scala.language.{higherKinds, implicitConversions}
 
-final case class Notification(deviceToken: DeviceToken, payload: Payload, identifier: Option[Int] = None,
-                              expiration: Option[Expiration] = None, priority: Option[Priority] = None)
+final case class Notification(
+  deviceToken: DeviceToken,
+  payload: Payload,
+  identifier: Option[Int] = None,
+  expiration: Option[Expiration] = None,
+  priority: Option[Priority] = None)
 
 object Notification {
   def apply(deviceToken: DeviceToken, payload: Payload, identifier: Int): Notification =
@@ -77,13 +81,14 @@ object Payload {
     }
   }
 
-  private[apns] case class SimpleBuilder[N, W[_]](marshaller: PayloadMarshaller.Aux[N, W],
-                                                  alert: Option[String] = None,
-                                                  badge: Option[Int] = None,
-                                                  sound: Option[String] = None,
-                                                  contentAvailable: Option[Int] = None,
-                                                  customFields: Map[String, N] = Map.empty[String, N])
-    extends Builder[N, W] {
+  private[apns] case class SimpleBuilder[N, W[_]](
+    marshaller: PayloadMarshaller.Aux[N, W],
+    alert: Option[String] = None,
+    badge: Option[Int] = None,
+    sound: Option[String] = None,
+    contentAvailable: Option[Int] = None,
+    customFields: Map[String, N] = Map.empty[String, N])
+      extends Builder[N, W] {
 
     override def withAlert(alert: String): Builder[N, W] = copy(alert = Some(alert))
 
@@ -128,20 +133,21 @@ object Payload {
     }
   }
 
-  private[apns] case class CompBuilder[N, W[_]](marshaller: PayloadMarshaller.Aux[N, W],
-                                                title: Option[String] = None,
-                                                body: Option[String] = None,
-                                                titleLocKey: Option[String] = None,
-                                                titleLocArgs: Option[Seq[String]] = None,
-                                                actionLocKey: Option[String] = None,
-                                                locKey: Option[String] = None,
-                                                locArgs: Option[Seq[String]] = None,
-                                                launchImage: Option[String] = None,
-                                                badge: Option[Int] = None,
-                                                sound: Option[String] = None,
-                                                contentAvailable: Option[Int] = None,
-                                                customFields: Map[String, N] = Map.empty[String, N])
-    extends Builder[N, W] {
+  private[apns] case class CompBuilder[N, W[_]](
+    marshaller: PayloadMarshaller.Aux[N, W],
+    title: Option[String] = None,
+    body: Option[String] = None,
+    titleLocKey: Option[String] = None,
+    titleLocArgs: Option[Seq[String]] = None,
+    actionLocKey: Option[String] = None,
+    locKey: Option[String] = None,
+    locArgs: Option[Seq[String]] = None,
+    launchImage: Option[String] = None,
+    badge: Option[Int] = None,
+    sound: Option[String] = None,
+    contentAvailable: Option[Int] = None,
+    customFields: Map[String, N] = Map.empty[String, N])
+      extends Builder[N, W] {
 
     override def withAlert(alert: String): Builder[N, W] = copy(body = Some(alert))
 

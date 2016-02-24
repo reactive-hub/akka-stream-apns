@@ -1,4 +1,5 @@
 import Dependencies._
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import sbt.Keys._
 import scalariform.formatter.preferences._
 
@@ -24,9 +25,10 @@ lazy val commonSettings = scalariformSettings ++ Seq(
   ),
 
   ScalariformKeys.preferences := FormattingPreferences()
-    .setPreference(RewriteArrowSymbols, true)
-    .setPreference(AlignParameters, true)
     .setPreference(AlignSingleLineCaseStatements, true)
+    .setPreference(DoubleIndentClassDeclaration, true)
+    .setPreference(DanglingCloseParenthesis, Prevent)
+    .setPreference(RewriteArrowSymbols, true)
 )
 
 lazy val root = (project in file("."))

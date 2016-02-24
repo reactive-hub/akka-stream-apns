@@ -1,6 +1,6 @@
 package reactivehub.akka.stream.apns.marshallers
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.{FlatSpec, Matchers}
 import reactivehub.akka.stream.apns.PayloadMarshaller
 
 trait MarshallerBehaviours {
@@ -45,10 +45,10 @@ trait MarshallerBehaviours {
     it should "encode an Object" in {
       val encoded = m.jsonObject(
         Map(
-          "field1" -> m.jsonString(string),
-          "field2" -> m.jsonNumber(int),
-          "field3" -> m.jsonArray(Seq(m.jsonString(string), m.jsonNumber(int))),
-          "field4" -> m.jsonObject(Map("field" -> m.jsonString(string)))))
+          "field1" → m.jsonString(string),
+          "field2" → m.jsonNumber(int),
+          "field3" → m.jsonArray(Seq(m.jsonString(string), m.jsonNumber(int))),
+          "field4" → m.jsonObject(Map("field" → m.jsonString(string)))))
       val expected = parse(
         s"""
            |{
@@ -71,10 +71,10 @@ trait MarshallerBehaviours {
     it should "render a valid JSON" in {
       val encoded = m.jsonObject(
         Map(
-          "field1" -> m.jsonString(string),
-          "field2" -> m.jsonNumber(int),
-          "field3" -> m.jsonArray(Seq(m.jsonString(string), m.jsonNumber(int))),
-          "field4" -> m.jsonObject(Map("field" -> m.jsonString(string)))))
+          "field1" → m.jsonString(string),
+          "field2" → m.jsonNumber(int),
+          "field3" → m.jsonArray(Seq(m.jsonString(string), m.jsonNumber(int))),
+          "field4" → m.jsonObject(Map("field" → m.jsonString(string)))))
       val expected = parse(m.print(encoded).utf8String)
       encoded should be(expected)
     }
