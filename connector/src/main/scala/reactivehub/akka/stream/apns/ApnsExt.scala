@@ -1,6 +1,6 @@
 package reactivehub.akka.stream.apns
 
-import akka.NotUsed
+import akka.{Done, NotUsed}
 import akka.actor.{ExtendedActorSystem, Extension, ExtensionKey}
 import akka.stream.TLSProtocol._
 import akka.stream.scaladsl._
@@ -12,7 +12,8 @@ import java.nio.ByteOrder
 import javax.net.ssl.SSLContext
 import reactivehub.akka.stream.apns.Environment.Production
 import reactivehub.akka.stream.apns.ErrorStatus._
-import scala.concurrent.Promise
+import scala.concurrent.{Future, Promise}
+import scala.util.Try
 
 class ApnsExt(implicit system: ExtendedActorSystem) extends Extension {
   def notificationService(sslContext: SSLContext): Flow[Notification, Error, NotUsed] =
@@ -27,21 +28,31 @@ class ApnsExt(implicit system: ExtendedActorSystem) extends Extension {
   def notificationService(address: InetSocketAddress, sslContext: SSLContext): Flow[Notification, Error, NotUsed] =
     NotificationStage().atop(tlsStage(sslContext)).join(transportFlow(address))
 
-  def feedbackService(sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
+  def feedbackService(sslContext: SSLContext): Source[Feedback, Promise[Done]] =
     feedbackService(Production, sslContext)
 
-  def feedbackService(environment: Environment, sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
+  def feedbackService(environment: Environment, sslContext: SSLContext): Source[Feedback, Promise[Done]] =
     feedbackService(environment.feedback, sslContext)
 
-  def feedbackService(host: String, port: Int, sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
+  def feedbackService(host: String, port: Int, sslContext: SSLContext): Source[Feedback, Promise[Done]] =
     feedbackService(new InetSocketAddress(host, port), sslContext)
 
-  def feedbackService(address: InetSocketAddress, sslContext: SSLContext): Source[Feedback, Promise[Option[ByteString]]] =
-    Source.maybe[ByteString].via(FeedbackStage().atop(tlsStage(sslContext)).join(transportFlow(address)))
+  def feedbackService(address: InetSocketAddress, sslContext: SSLContext): Source[Feedback, Promise[Done]] =
+    emptySource.via(FeedbackStage().atop(tlsStage(sslContext)).join(transportFlow(address)))
 
   private def tlsStage(sslContext: SSLContext) = TLS(sslContext, NegotiateNewSession.withDefaults, Client)
 
   private def transportFlow(address: InetSocketAddress) = Tcp().outgoingConnection(address)
+
+  private def emptySource: Source[ByteString, Promise[Done]] =
+    Source.maybe[ByteString].mapMaterializedValue { orig ⇒
+      new Promise[Done] {
+        import system.dispatcher
+        override def future: Future[Done] = orig.future.map(_ ⇒ Done)
+        override def isCompleted: Boolean = orig.isCompleted
+        override def tryComplete(result: Try[Done]): Boolean = orig.tryComplete(result.map(_ ⇒ None))
+      }
+    }
 }
 
 object ApnsExt extends ExtensionKey[ApnsExt]
