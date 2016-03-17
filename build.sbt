@@ -6,7 +6,7 @@ import scalariform.formatter.preferences._
 lazy val commonSettings = scalariformSettings ++ Seq(
   organization := "com.reactivehub",
   version := "0.2-SNAPSHOT",
-  scalaVersion := "2.11.7",
+  scalaVersion := "2.11.8",
 
   licenses := Seq(("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))),
   scmInfo := Some(ScmInfo(url("https://github.com/reactive-hub/akka-stream-apns"),
