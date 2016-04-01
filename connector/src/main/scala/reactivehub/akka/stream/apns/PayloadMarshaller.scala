@@ -1,7 +1,7 @@
 package reactivehub.akka.stream.apns
 
 import akka.util.ByteString
-import scala.language.{higherKinds, implicitConversions}
+import scala.language.higherKinds
 
 trait PayloadMarshaller {
   type Node

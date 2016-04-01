@@ -179,7 +179,7 @@ private[apns] object NotificationStage {
       case s   ⇒ throw new RuntimeException(s"Invalid error status $s")
     }
 
-    Error(status, bytes.getInt)
+    Error(status, bytes.getLong)
   }
 }
 
@@ -199,6 +199,6 @@ private[apns] object FeedbackStage {
     val bytes = response.iterator
     val timestamp = bytes.getLong
     val tokenLength = bytes.getShort
-    Feedback(DeviceToken(bytes.take(tokenLength).toArray), timestamp)
+    Feedback(DeviceToken(bytes.take(tokenLength.toInt).toArray), timestamp)
   }
 }

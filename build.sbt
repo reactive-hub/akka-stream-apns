@@ -8,6 +8,20 @@ lazy val commonSettings = scalariformSettings ++ Seq(
   version := "0.2-SNAPSHOT",
   scalaVersion := "2.11.8",
 
+  scalacOptions := Seq(
+    "-deprecation",
+    "-encoding", "UTF-8",
+    "-feature",
+    "-unchecked",
+    "-Xfatal-warnings",
+    "-Xlint",
+    "-Xfuture",
+    "-Ywarn-dead-code",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-unused",
+    "-Ywarn-unused-import"
+  ),
+
   licenses := Seq(("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))),
   scmInfo := Some(ScmInfo(url("https://github.com/reactive-hub/akka-stream-apns"),
     "git@github.com:reactive-hub/akka-stream-apns.git")),
