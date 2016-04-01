@@ -41,7 +41,8 @@ lazy val commonSettings = scalariformSettings ++ Seq(
   ScalariformKeys.preferences := FormattingPreferences()
     .setPreference(AlignSingleLineCaseStatements, true)
     .setPreference(DoubleIndentClassDeclaration, true)
-    .setPreference(DanglingCloseParenthesis, Prevent)
+    .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
+    .setPreference(DanglingCloseParenthesis, Preserve)
     .setPreference(RewriteArrowSymbols, true)
 )
 
