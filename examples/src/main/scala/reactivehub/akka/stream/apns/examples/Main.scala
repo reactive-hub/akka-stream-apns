@@ -1,4 +1,4 @@
-package reactivehub.akka.streams.apns.examples
+package reactivehub.akka.stream.apns.examples
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
