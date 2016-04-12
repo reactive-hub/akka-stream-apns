@@ -7,8 +7,8 @@ object Dependencies {
   val sprayJson         = "io.spray"          %% "spray-json"          % "1.3.2"
   val playJson          = "com.typesafe.play" %% "play-json"           % "2.5.1"
   val liftJson          = "net.liftweb"       %% "lift-json"           % "2.6.3"
-  val circeParser       = "io.circe"          %% "circe-parser"        % "0.3.0"
-  val circeGeneric      = "io.circe"          %% "circe-generic"       % "0.3.0"
+  val circeParser       = "io.circe"          %% "circe-parser"        % "0.4.0"
+  val circeGeneric      = "io.circe"          %% "circe-generic"       % "0.4.0"
 
   val scalaTest         = "org.scalatest"     %% "scalatest"           % "2.2.6"
   val akkaStreamTestkit = "com.typesafe.akka" %% "akka-stream-testkit" % "2.4.3"
