@@ -47,7 +47,7 @@ lazy val commonSettings = scalariformSettings ++ Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(connector, examples)
+  .aggregate(connector, examples, benchmarks)
   .settings(commonSettings)
   .settings(
     name := "akka-stream-apns-root",
@@ -68,6 +68,16 @@ lazy val examples = (project in file("examples"))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= examplesDeps,
+    publishArtifact := false,
+    publish := (),
+    publishLocal := ()
+  )
+
+lazy val benchmarks = (project in file("benchmarks"))
+  .enablePlugins(JmhPlugin)
+  .dependsOn(connector % "compile;compile->test")
+  .settings(commonSettings)
+  .settings(
     publishArtifact := false,
     publish := (),
     publishLocal := ()

@@ -2,7 +2,8 @@ package reactivehub.akka.stream.apns.marshallers
 
 import akka.util.ByteString
 import net.liftweb.json._
-import reactivehub.akka.stream.apns.PayloadMarshaller
+import reactivehub.akka.stream.apns.ResponseUtil.parseReason
+import reactivehub.akka.stream.apns._
 
 trait LiftJsonSupport {
   import LiftJsonSupport.LiftWriter
@@ -19,10 +20,26 @@ trait LiftJsonSupport {
   }
 
   implicit def liftWriter[T](implicit f: Formats): LiftWriter[T] = new LiftWriter[T]
+
+  private[apns] object ResponseUnmarshallerFormats {
+    implicit val Format = DefaultFormats +
+      new CustomSerializer[Reason]({ ser ⇒
+        ({
+          case json @ JString(str) ⇒
+            parseReason(str).getOrElse(
+              throw new MappingException(s"Can't convert $json to Reason"))
+        }, PartialFunction.empty)
+      })
+  }
+
+  implicit object LiftJsonResponseUnmarshaller extends ResponseUnmarshaller {
+    import ResponseUnmarshallerFormats._
+    override def read(str: String): ResponseBody = parse(str).extract[ResponseBody]
+  }
 }
 
 object LiftJsonSupport {
-  class LiftWriter[T](implicit f: Formats) {
+  final class LiftWriter[T](implicit f: Formats) {
     def write(t: T): JValue = Extraction.decompose(t)
   }
 }

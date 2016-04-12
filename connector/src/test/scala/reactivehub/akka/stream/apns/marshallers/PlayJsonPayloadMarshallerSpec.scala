@@ -4,7 +4,9 @@ import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsValue, Json}
 import reactivehub.akka.stream.apns.marshallers.MarshallerBehaviours.Custom
 
-class PlayJsonPayloadMarshallerSpec extends FlatSpec with Matchers with MarshallerBehaviours with PlayJsonSupport {
+class PlayJsonPayloadMarshallerSpec extends FlatSpec with Matchers
+    with MarshallerBehaviours with PlayJsonSupport {
+
   override val m = PlayJsonPayloadMarshaller
   override def wrap(field: String, value: JsValue): JsValue = Json.obj(field → value)
   override def parse(value: String): JsValue = Json.parse(value)
@@ -21,4 +23,5 @@ class PlayJsonPayloadMarshallerSpec extends FlatSpec with Matchers with Marshall
     """.stripMargin)
 
   "PlayJsonPayloadMarshaller" should behave like payloadMarshaller("test", 123, t, expectedT)
+  "PlayJsonResponseUnmarshaller" should behave like responseUnmarshallerWithSaneNone
 }

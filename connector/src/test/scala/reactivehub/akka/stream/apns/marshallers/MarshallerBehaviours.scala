@@ -1,7 +1,7 @@
 package reactivehub.akka.stream.apns.marshallers
 
 import org.scalatest.{FlatSpec, Matchers}
-import reactivehub.akka.stream.apns.PayloadMarshaller
+import reactivehub.akka.stream.apns._
 
 trait MarshallerBehaviours {
   this: FlatSpec with Matchers ⇒
@@ -77,6 +77,76 @@ trait MarshallerBehaviours {
           "field4" → m.jsonObject(Map("field" → m.jsonString(string)))))
       val expected = parse(m.print(encoded).utf8String)
       encoded should be(expected)
+    }
+  }
+
+  def responseUnmarshaller(implicit ru: ResponseUnmarshaller): Unit = {
+    it should "read a valid JSON with key reason" in {
+      val json =
+        s"""
+           |{
+           |  "reason": "PayloadEmpty"
+           |}
+         """.stripMargin
+      ru.read(json) shouldBe ResponseBody(Reason.PayloadEmpty, None)
+    }
+
+    it should "read a valid JSON with keys reason and timestamp" in {
+      val json =
+        s"""
+           |{
+           |  "reason": "PayloadEmpty",
+           |  "timestamp": 12345
+           |}
+         """.stripMargin
+      ru.read(json) shouldBe ResponseBody(Reason.PayloadEmpty, Some(12345L))
+    }
+
+    it should "fail to read a valid JSON with no reason key" in {
+      val json =
+        s"""
+           |{
+           |  "timestamp": 12345
+           |}
+         """.stripMargin
+      intercept[Exception] {
+        ru.read(json)
+      }
+    }
+
+    it should "fail to read a valid JSON with an unknown reason" in {
+      val json =
+        s"""
+           |{
+           |  "reason": "UnknownReason"
+           |}
+         """.stripMargin
+      intercept[Exception] {
+        ru.read(json)
+      }
+    }
+
+    it should "fail to read an invalid JSON" in {
+      intercept[Exception] {
+        ru.read("invalid")
+      }
+    }
+  }
+
+  def responseUnmarshallerWithSaneNone(implicit ru: ResponseUnmarshaller): Unit = {
+    responseUnmarshaller
+
+    it should "fail to read a valid JSON with invalid timestamp" in {
+      val json =
+        s"""
+           |{
+           |  "reason": "PayloadEmpty",
+           |  "timestamp": "string"
+           |}
+         """.stripMargin
+      intercept[Exception] {
+        ru.read(json)
+      }
     }
   }
 }

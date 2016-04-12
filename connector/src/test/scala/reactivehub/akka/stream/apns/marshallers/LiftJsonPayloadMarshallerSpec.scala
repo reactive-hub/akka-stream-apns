@@ -4,7 +4,9 @@ import net.liftweb.json.{parse ⇒ liftParse, _}
 import org.scalatest.{FlatSpec, Matchers}
 import reactivehub.akka.stream.apns.marshallers.MarshallerBehaviours.Custom
 
-class LiftJsonPayloadMarshallerSpec extends FlatSpec with Matchers with MarshallerBehaviours with LiftJsonSupport {
+class LiftJsonPayloadMarshallerSpec extends FlatSpec with Matchers
+    with MarshallerBehaviours with LiftJsonSupport {
+
   override val m = LiftJsonPayloadMarshaller
   override def wrap(field: String, value: JValue): JValue = JObject(List(JField(field, value)))
   override def parse(str: String): JValue = liftParse(str)
@@ -21,4 +23,5 @@ class LiftJsonPayloadMarshallerSpec extends FlatSpec with Matchers with Marshall
     """.stripMargin)
 
   "LiftJsonPayloadMarshaller" should behave like payloadMarshaller("test", 123, t, expectedT)
+  "ListJsonResponseUnmarshaller" should behave like responseUnmarshaller
 }

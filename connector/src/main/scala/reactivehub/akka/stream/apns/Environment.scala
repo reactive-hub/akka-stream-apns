@@ -2,19 +2,9 @@ package reactivehub.akka.stream.apns
 
 import java.net.InetSocketAddress
 
-sealed trait Environment {
-  def gateway: InetSocketAddress
-  def feedback: InetSocketAddress
-}
-
 object Environment {
-  case object Production extends Environment {
-    override val gateway = new InetSocketAddress("gateway.push.apple.com", 2195)
-    override val feedback = new InetSocketAddress("feedback.push.apple.com", 2196)
-  }
-
-  case object Sandbox extends Environment {
-    override val gateway = new InetSocketAddress("gateway.sandbox.push.apple.com", 2195)
-    override val feedback = new InetSocketAddress("feedback.sandbox.push.apple.com", 2196)
-  }
+  val Production = new InetSocketAddress("api.push.apple.com", 443)
+  val Production2197 = new InetSocketAddress("api.push.apple.com", 2197)
+  val Development = new InetSocketAddress("api.development.push.apple.com", 443)
+  val Development2197 = new InetSocketAddress("api.development.push.apple.com", 2197)
 }

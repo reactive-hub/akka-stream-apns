@@ -3,6 +3,9 @@ package reactivehub.akka.stream.apns
 import akka.util.ByteString
 import scala.language.higherKinds
 
+/**
+  * Writes notification payload to a JSON string.
+  */
 trait PayloadMarshaller {
   type Node
   type Writer[_]

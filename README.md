@@ -1,9 +1,10 @@
 # Reactive APNs Connector
 
 Akka-stream-apns is an [Apple Push Notification Service](https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html)
-(APNs) connector built on top of [Akka Streams](http://akka.io).
+(APNs) connector built on top of [Akka Streams](http://akka.io). As of version 0.2,
+akka-stream-apns uses the latest HTTP/2-based APNs provider API.
 
-## Quick Start
+## Installation
 
 ```scala
 resolvers += Resolver.bintrayRepo("reactivehub", "maven")
@@ -11,25 +12,32 @@ resolvers += Resolver.bintrayRepo("reactivehub", "maven")
 libraryDependencies += "com.reactivehub" %% "akka-stream-apns" % "0.1"
 ```
 
+## Quick Start
+
 To use the connector, you need a [push notification client SSL certificate](https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/ConfiguringPushNotifications/ConfiguringPushNotifications.html)
 and a [device token](https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/IPhoneOSClientImp.html).
+See System Requirements for more details on how to choose a TLS provider.
 
 ```scala
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import reactivehub.akka.stream.apns.Environment.Sandbox
+import io.netty.channel.nio.NioEventLoopGroup
 import reactivehub.akka.stream.apns.TlsUtil.loadPkcs12FromResource
 import reactivehub.akka.stream.apns._
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import reactivehub.akka.stream.apns.marshallers.SprayJsonSupport
 
 object Main extends App with SprayJsonSupport {
   implicit val system = ActorSystem("system")
   implicit val _ = ActorMaterializer()
 
-  // Flow[Notification, Error, Unit]
-  val apns = ApnsExt(system).notificationService(Sandbox, loadPkcs12FromResource("/cert.p12", "password"))
+  import system.dispatcher
+
+  val group = new NioEventLoopGroup()
+  val apns = ApnsExt(system).connection[Int](
+    Environment.Development,
+    loadPkcs12FromResource("/cert.p12", "password"),
+    group)
 
   val deviceToken = DeviceToken("64-chars hex string")
 
@@ -37,10 +45,13 @@ object Main extends App with SprayJsonSupport {
     .withAlert("Hello!")
     .withBadge(1)
 
-  val f = Source.single(Notification(deviceToken, payload)).via(apns).runForeach(println)
-
-  Await.result(f, Duration.Inf)
-  system.shutdown()
+  Source.single(1 → Notification(deviceToken, payload))
+    .via(apns)
+    .runForeach(println)
+    .onComplete { _ ⇒
+      group.shutdownGracefully()
+      system.terminate()
+    }
 }
 ```
 
@@ -61,9 +72,29 @@ val payload = Payload.Builder()
   .withBadge(9)
   .withSound("chime.aiff")
   .withContentAvailable
+  .withCategory("ACCEPT_IDENTIFIER")
   .withCustomField("acme1", "bar")
   .withCustomField("acme2", 42)
 ```
+
+## System Requirements
+
+Akka-stream-apns works with Java 8 and newer.
+
+HTTP/2 over TLS requires the use of ALPN. Java, however, currently does not
+support ALPN. As akka-stream-apns internally uses [Netty's](http://netty.io)
+`codec-http2` to connect to APNs servers, there are two options how to do TLS:
+
+ * [TLS with OpenSSL](http://netty.io/wiki/requirements-for-4.x.html#tls-with-openssl)
+ * [TLS with JDK + Jetty-ALPN](http://netty.io/wiki/requirements-for-4.x.html#tls-with-jdk-jetty-alpnnpn)
+
+    Add `Xbootclasspath` JVM option with the path to the Jetty `alpn-boot` jar.
+    The [Jetty-ALPN jar](http://www.eclipse.org/jetty/documentation/current/alpn-chapter.html#alpn-versions)
+    is specific to the version of Java you are using.
+
+    ```
+    java -Xbootclasspath/p:/path/to/jetty/alpn/extension.jar ...
+    ```
 
 ## Limitations
 

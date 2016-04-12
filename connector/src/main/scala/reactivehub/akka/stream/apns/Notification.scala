@@ -1,23 +1,30 @@
 package reactivehub.akka.stream.apns
 
 import akka.util.ByteString
+import java.util.UUID
 import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration._
 import scala.language.{higherKinds, implicitConversions}
 
+/**
+  * APNs notification model.
+  */
 final case class Notification(
   deviceToken: DeviceToken,
   payload: Payload,
-  identifier: Option[Int] = None,
+  id: Option[UUID] = None,
   expiration: Option[Expiration] = None,
-  priority: Option[Priority] = None)
+  priority: Option[Priority] = None,
+  topic: Option[String] = None)
 
 object Notification {
-  def apply(deviceToken: DeviceToken, payload: Payload, identifier: Int): Notification =
-    Notification(deviceToken, payload, identifier = Some(identifier))
+  def apply(deviceToken: DeviceToken, payload: Payload, id: UUID): Notification =
+    Notification(deviceToken, payload, id = Some(id))
 }
 
 final case class Payload(value: ByteString) {
+  def size: Int = value.size
+  def toArray: Array[Byte] = value.toArray[Byte]
   override def toString: String = value.utf8String
 }
 
@@ -36,6 +43,7 @@ object Payload {
     def withBadge(badge: Int): Builder[N, W]
     def withSound(sound: String): Builder[N, W]
     def withContentAvailable: Builder[N, W]
+    def withCategory(category: String): Builder[N, W]
     def withCustomField[T](key: String, value: T)(implicit writer: W[T]): Builder[N, W]
     def result: Payload
   }
@@ -72,6 +80,8 @@ object Payload {
 
     override def withContentAvailable: Builder[N, W] = SimpleBuilder[N, W](marshaller, contentAvailable = Some(1))
 
+    override def withCategory(category: String): Builder[N, W] = SimpleBuilder[N, W](marshaller, category = Some(category))
+
     override def withCustomField[T](key: String, value: T)(implicit writer: W[T]): Builder[N, W] =
       SimpleBuilder[N, W](marshaller, customFields = Map(key → marshaller.write(value, writer)))
 
@@ -87,6 +97,7 @@ object Payload {
     badge: Option[Int] = None,
     sound: Option[String] = None,
     contentAvailable: Option[Int] = None,
+    category: Option[String] = None,
     customFields: Map[String, N] = Map.empty[String, N])
       extends Builder[N, W] {
 
@@ -94,29 +105,31 @@ object Payload {
 
     override def withLocalizedAlert(key: String, args: String*): Builder[N, W] =
       CompBuilder[N, W](marshaller, body = alert, locKey = Some(key), locArgs = Some(args),
-        badge = badge, sound = sound, contentAvailable = contentAvailable, customFields = customFields)
+        badge = badge, sound = sound, contentAvailable = contentAvailable, category = category, customFields = customFields)
 
     override def withTitle(title: String): Builder[N, W] =
       CompBuilder[N, W](marshaller, body = alert, title = Some(title), badge = badge,
-        sound = sound, contentAvailable = contentAvailable, customFields = customFields)
+        sound = sound, contentAvailable = contentAvailable, category = category, customFields = customFields)
 
     override def withLocalizedTitle(key: String, args: String*): Builder[N, W] =
       CompBuilder[N, W](marshaller, body = alert, titleLocKey = Some(key), titleLocArgs = Some(args),
-        badge = badge, sound = sound, contentAvailable = contentAvailable, customFields = customFields)
+        badge = badge, sound = sound, contentAvailable = contentAvailable, category = category, customFields = customFields)
 
     override def withLocalizedAction(key: String): Builder[N, W] =
       CompBuilder[N, W](marshaller, body = alert, actionLocKey = Some(key), badge = badge,
-        sound = sound, contentAvailable = contentAvailable, customFields = customFields)
+        sound = sound, contentAvailable = contentAvailable, category = category, customFields = customFields)
 
     override def withLaunchImage(launchImage: String): Builder[N, W] =
       CompBuilder[N, W](marshaller, body = alert, launchImage = Some(launchImage), badge = badge,
-        sound = sound, contentAvailable = contentAvailable, customFields = customFields)
+        sound = sound, contentAvailable = contentAvailable, category = category, customFields = customFields)
 
     override def withBadge(badge: Int): Builder[N, W] = copy(badge = Some(badge))
 
     override def withSound(sound: String): Builder[N, W] = copy(sound = Some(sound))
 
     override def withContentAvailable: Builder[N, W] = copy(contentAvailable = Some(1))
+
+    override def withCategory(category: String): Builder[N, W] = copy(category = Some(category))
 
     override def withCustomField[T](key: String, value: T)(implicit writer: W[T]): Builder[N, W] =
       copy(customFields = customFields.updated(key, marshaller.write(value, writer)))
@@ -126,7 +139,8 @@ object Payload {
         "alert" → alert.map(marshaller.jsonString),
         "badge" → badge.map(marshaller.jsonNumber),
         "sound" → sound.map(marshaller.jsonString),
-        "content-available" → contentAvailable.map(marshaller.jsonNumber)).filter(_._2.isDefined).mapValues(_.get)
+        "content-available" → contentAvailable.map(marshaller.jsonNumber),
+        "category" → category.map(marshaller.jsonString)).filter(_._2.isDefined).mapValues(_.get)
 
       val json = marshaller.jsonObject(customFields ++ Map("aps" → marshaller.jsonObject(aps)))
       Payload(marshaller.print(json))
@@ -146,6 +160,7 @@ object Payload {
     badge: Option[Int] = None,
     sound: Option[String] = None,
     contentAvailable: Option[Int] = None,
+    category: Option[String] = None,
     customFields: Map[String, N] = Map.empty[String, N])
       extends Builder[N, W] {
 
@@ -169,6 +184,8 @@ object Payload {
 
     override def withContentAvailable: Builder[N, W] = copy(contentAvailable = Some(1))
 
+    override def withCategory(category: String): Builder[N, W] = copy(category = Some(category))
+
     override def withCustomField[T](key: String, value: T)(implicit writer: W[T]): Builder[N, W] =
       copy(customFields = customFields.updated(key, marshaller.write(value, writer)))
 
@@ -187,7 +204,8 @@ object Payload {
         "alert" → Some(marshaller.jsonObject(alert)),
         "badge" → badge.map(marshaller.jsonNumber),
         "sound" → sound.map(marshaller.jsonString),
-        "content-available" → contentAvailable.map(marshaller.jsonNumber)).filter(_._2.isDefined).mapValues(_.get)
+        "content-available" → contentAvailable.map(marshaller.jsonNumber),
+        "category" → category.map(marshaller.jsonString)).filter(_._2.isDefined).mapValues(_.get)
 
       val json = marshaller.jsonObject(customFields ++ Map("aps" → marshaller.jsonObject(aps)))
       Payload(marshaller.print(json))
@@ -195,17 +213,18 @@ object Payload {
   }
 }
 
-final case class Expiration(value: Int)
+final case class Expiration(value: Long) {
+  override def toString: String = value.toString
+}
 
 object Expiration {
   implicit def apply(duration: Duration): Expiration = duration match {
-    case d: FiniteDuration ⇒
-      val seconds = (System.nanoTime().nanos + d).toSeconds
-      Expiration(if (seconds > Int.MaxValue) 0 else seconds.toInt)
-    case _: Infinite ⇒ Expiration(0)
+    case d: FiniteDuration ⇒ Expiration((System.nanoTime().nanos + d).toSeconds)
+    case _: Infinite       ⇒ Expiration(0)
   }
 
-  implicit def forInt(value: Int): Expiration = Expiration(value)
+  implicit def forInt(value: Int): Expiration = Expiration(value.toLong)
+  implicit def forLong(value: Long): Expiration = Expiration(value)
 }
 
 sealed trait Priority
