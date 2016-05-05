@@ -5,11 +5,11 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.testkit.{ImplicitSender, TestKit, TestKitBase, TestProbe}
 import io.netty.buffer.{ByteBuf, ByteBufUtil, Unpooled}
+import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
-import io.netty.channel.{Channel, _}
-import io.netty.handler.codec.http2.{DefaultHttp2Headers, Http2Stream, _}
+import io.netty.handler.codec.http2._
 import io.netty.handler.ssl.ApplicationProtocolConfig._
 import io.netty.handler.ssl._
 import io.netty.handler.ssl.util.{InsecureTrustManagerFactory, SelfSignedCertificate}

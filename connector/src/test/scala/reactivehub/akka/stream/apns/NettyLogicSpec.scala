@@ -5,10 +5,10 @@ import akka.stream._
 import akka.stream.scaladsl.{Sink, Source}
 import akka.testkit.{ImplicitSender, TestKit, TestKitBase, TestProbe}
 import io.netty.buffer.{ByteBufAllocator, UnpooledByteBufAllocator}
+import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.{ChannelInputShutdownEvent, SocketChannel}
-import io.netty.channel.{Channel, ChannelHandlerContext, _}
 import io.netty.handler.codec.LineBasedFrameDecoder
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import io.netty.util.CharsetUtil._

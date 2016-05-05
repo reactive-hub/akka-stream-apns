@@ -2,9 +2,9 @@ package reactivehub.akka.stream.apns
 
 import akka.NotUsed
 import akka.actor.ActorSystem
+import akka.stream._
 import akka.stream.scaladsl.{Sink, Source, Tcp}
 import akka.stream.stage.{GraphStage, GraphStageLogic}
-import akka.stream.{Attributes, _}
 import akka.util.ByteString
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel._

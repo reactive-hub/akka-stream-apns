@@ -1,8 +1,7 @@
 package reactivehub.akka.stream.apns.marshallers
 
-import io.circe.Json
 import io.circe.generic.auto._
-import io.circe.parser
+import io.circe.{Json, parser}
 import org.scalatest.{FlatSpec, Matchers}
 import reactivehub.akka.stream.apns.marshallers.MarshallerBehaviours.Custom
 

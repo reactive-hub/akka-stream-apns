@@ -3,7 +3,7 @@ package reactivehub.akka.stream.apns
 import akka.stream.FlowShape
 import akka.stream.stage.{GraphStageLogic, InHandler, OutHandler}
 import io.netty.channel.ChannelOption.ALLOW_HALF_CLOSURE
-import io.netty.channel.{ChannelFutureListener, _}
+import io.netty.channel._
 import io.netty.channel.socket.{ChannelInputShutdownEvent, SocketChannel}
 import io.netty.util.concurrent.PromiseCombiner
 import java.nio.channels.ClosedChannelException

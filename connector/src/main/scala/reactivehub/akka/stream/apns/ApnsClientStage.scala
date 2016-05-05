@@ -3,10 +3,10 @@ package reactivehub.akka.stream.apns
 import akka.stream._
 import akka.stream.stage.{GraphStageLogic, GraphStageWithMaterializedValue}
 import io.netty.bootstrap.Bootstrap
+import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
-import io.netty.channel.{ChannelInitializer, ChannelOption, _}
 import io.netty.handler.codec.http2.Http2Settings
 import io.netty.handler.ssl._
 import java.lang.{Class ⇒ JClass}

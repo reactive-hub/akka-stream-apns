@@ -3,7 +3,6 @@ package reactivehub.akka.stream.apns
 import org.scalatest.{FlatSpec, Matchers}
 import reactivehub.akka.stream.apns.Payload.Builder
 import reactivehub.akka.stream.apns.marshallers.SprayJsonSupport
-import spray.json.DefaultJsonProtocol
 import spray.json._
 
 class PayloadSpec
