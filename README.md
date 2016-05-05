@@ -99,3 +99,9 @@ support ALPN. As akka-stream-apns internally uses [Netty's](http://netty.io)
 ## Limitations
 
 * No reconnect/resend on error (yet)
+
+## Consulting
+
+Our professional consulting services are highly flexible to address specific issues such as troubleshooting or other services tailored to suit your needs.
+
+Please [contact us](mailto:info@reactivehub.com) for more information.
