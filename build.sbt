@@ -1,11 +1,9 @@
 import Dependencies._
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
-import sbt.Keys._
 import scalariform.formatter.preferences._
 
 lazy val commonSettings = scalariformSettings ++ Seq(
   organization := "com.reactivehub",
-  version := "0.2-SNAPSHOT",
   scalaVersion := "2.11.8",
 
   scalacOptions := Seq(
@@ -38,6 +36,9 @@ lazy val commonSettings = scalariformSettings ++ Seq(
     </developers>
   ),
 
+  releaseTagComment    := s"Release ${(version in ThisBuild).value}",
+  releaseCommitMessage := s"Set version to ${(version in ThisBuild).value}",
+
   ScalariformKeys.preferences := FormattingPreferences()
     .setPreference(AlignSingleLineCaseStatements, true)
     .setPreference(DoubleIndentClassDeclaration, true)
@@ -46,39 +47,33 @@ lazy val commonSettings = scalariformSettings ++ Seq(
     .setPreference(RewriteArrowSymbols, true)
 )
 
+lazy val noPublishSettings = Seq(
+  publish := (),
+  publishLocal := (),
+  publishArtifact := false
+)
+
 lazy val root = (project in file("."))
   .aggregate(connector, examples, benchmarks)
+  .settings(moduleName := "akka-stream-apns-root")
   .settings(commonSettings)
-  .settings(
-    name := "akka-stream-apns-root",
-    publishArtifact := false,
-    publish := (),
-    publishLocal := ()
-  )
+  .settings(noPublishSettings)
 
 lazy val connector = (project in file("connector"))
+  .settings(moduleName := "akka-stream-apns")
   .settings(commonSettings)
-  .settings(
-    name := "akka-stream-apns",
-    libraryDependencies ++= connectorDeps
-  )
+  .settings(libraryDependencies ++= connectorDeps)
 
 lazy val examples = (project in file("examples"))
   .dependsOn(connector)
+  .settings(moduleName := "akka-stream-apns-examples")
   .settings(commonSettings)
-  .settings(
-    libraryDependencies ++= examplesDeps,
-    publishArtifact := false,
-    publish := (),
-    publishLocal := ()
-  )
+  .settings(noPublishSettings)
+  .settings(libraryDependencies ++= examplesDeps)
 
 lazy val benchmarks = (project in file("benchmarks"))
   .enablePlugins(JmhPlugin)
   .dependsOn(connector % "compile;compile->test")
+  .settings(moduleName := "akka-stream-apns-benchmarks")
   .settings(commonSettings)
-  .settings(
-    publishArtifact := false,
-    publish := (),
-    publishLocal := ()
-  )
+  .settings(noPublishSettings)
