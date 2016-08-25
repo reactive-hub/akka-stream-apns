@@ -10,7 +10,7 @@ object Dependencies {
   val circeParser       = "io.circe"          %% "circe-parser"        % "0.4.1"
   val circeGeneric      = "io.circe"          %% "circe-generic"       % "0.4.1"
 
-  val scalaTest         = "org.scalatest"     %% "scalatest"           % "2.2.6"
+  val scalaTest         = "org.scalatest"     %% "scalatest"           % "3.0.0"
   val akkaStreamTestkit = "com.typesafe.akka" %% "akka-stream-testkit" % "2.4.7"
 
   val connectorDeps = Seq(akkaStream, netty) ++
