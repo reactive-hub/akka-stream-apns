@@ -53,7 +53,7 @@ lazy val noPublishSettings = Seq(
   publishArtifact := false
 )
 
-lazy val root = (project in file("."))
+lazy val `akka-stream-apns` = (project in file("."))
   .aggregate(connector, examples, benchmarks)
   .settings(moduleName := "akka-stream-apns-root")
   .settings(commonSettings)
