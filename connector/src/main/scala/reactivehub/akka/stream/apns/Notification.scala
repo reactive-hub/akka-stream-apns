@@ -15,7 +15,8 @@ final case class Notification(
   id: Option[UUID] = None,
   expiration: Option[Expiration] = None,
   priority: Option[Priority] = None,
-  topic: Option[String] = None)
+  topic: Option[String] = None,
+  collapseId: Option[String] = None)
 
 object Notification {
   def apply(deviceToken: DeviceToken, payload: Payload, id: UUID): Notification =

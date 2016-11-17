@@ -72,6 +72,7 @@ private[apns] object ApnsConnectionHandler {
   val HeaderExpiration = "apns-expiration"
   val HeaderPriority = "apns-priority"
   val HeaderTopic = "apns-topic"
+  val HeaderCollapseId = "apns-collapse-id"
   val HeaderStatus = ":status"
 }
 
@@ -136,6 +137,8 @@ private[apns] final class ApnsConnectionHandler(
       }
 
       topic.foreach(topic ⇒ headers.add(HeaderTopic, topic))
+      
+      collapseId.foreach(collapseId ⇒ headers.add(HeaderCollapseId, collapseId))
 
       val headersPromise = ctx.newPromise()
       encoder.writeHeaders(ctx, streamId, headers, 0, false, headersPromise)
