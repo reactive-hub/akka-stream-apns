@@ -13,8 +13,10 @@ object Dependencies {
   val scalaTest         = "org.scalatest"     %% "scalatest"           % "3.0.1"
   val akkaStreamTestkit = "com.typesafe.akka" %% "akka-stream-testkit" % "2.4.16"
 
-  val connectorDeps = Seq(akkaStream, netty) ++
-    Seq(sprayJson, playJson, liftJson, circeParser).map(_ % Provided) ++
+  def connectorDeps(scalaVersion: String): Seq[ModuleID] =
+    Seq(akkaStream, netty) ++
+    Seq(sprayJson, liftJson, circeParser).map(_ % Provided) ++
+    (if (scalaVersion.startsWith("2.11.")) Seq(playJson % Provided) else Nil) ++
     Seq(scalaTest, akkaStreamTestkit, circeGeneric).map(_ % Test)
 
   val examplesDeps = Seq(sprayJson)

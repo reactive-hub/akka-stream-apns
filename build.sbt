@@ -4,7 +4,8 @@ import scalariform.formatter.preferences._
 
 lazy val commonSettings = scalariformSettings ++ Seq(
   organization := "com.reactivehub",
-  scalaVersion := "2.11.8",
+  scalaVersion := crossScalaVersions.value.head,
+  crossScalaVersions := Seq("2.11.8", "2.12.1"),
 
   scalacOptions := Seq(
     "-deprecation",
@@ -62,7 +63,7 @@ lazy val `akka-stream-apns` = (project in file("."))
 lazy val connector = (project in file("connector"))
   .settings(moduleName := "akka-stream-apns")
   .settings(commonSettings)
-  .settings(libraryDependencies ++= connectorDeps)
+  .settings(libraryDependencies ++= connectorDeps(scalaVersion.value))
 
 lazy val examples = (project in file("examples"))
   .dependsOn(connector)
