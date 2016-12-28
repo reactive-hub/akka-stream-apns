@@ -10,7 +10,7 @@ class CircePayloadMarshallerSpec extends FlatSpec with Matchers
 
   override val m = CircePayloadMarshaller
   override def wrap(field: String, value: Json): Json = Json.obj(field → value)
-  override def parse(value: String): Json = parser.parse(value).toOption.get
+  override def parse(value: String): Json = parser.parse(value).right.get
 
   val t = Custom("test", 123)
   val expectedT = parse(

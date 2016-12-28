@@ -1,7 +1,6 @@
 package reactivehub.akka.stream.apns.marshallers
 
 import akka.util.ByteString
-import cats.data.Xor
 import io.circe.Decoder.instance
 import io.circe._
 import io.circe.parser.parse
@@ -23,15 +22,15 @@ trait CirceSupport {
   private[apns] object ResponseBodyDecoders {
     implicit val ReasonDecoder = instance { c ⇒
       for {
-        s ← c.focus.as[String]
-        r ← Xor.fromOption(parseReason(s), DecodingFailure("Reason", c.history))
+        s ← c.focus.as[String].right
+        r ← parseReason(s).toRight(DecodingFailure("Reason", c.history)).right
       } yield r
     }
 
     implicit val ResponseBodyDecoder = instance { c ⇒
       for {
-        r ← c.downField("reason").as[Reason]
-        t ← c.downField("timestamp").as[Option[Long]]
+        r ← c.downField("reason").as[Reason].right
+        t ← c.downField("timestamp").as[Option[Long]].right
       } yield ResponseBody(r, t)
     }
   }
@@ -39,6 +38,6 @@ trait CirceSupport {
   implicit object CirceResponseUnmarshaller extends ResponseUnmarshaller {
     import ResponseBodyDecoders._
     override def read(str: String): ResponseBody =
-      parse(str).flatMap(Decoder[ResponseBody].decodeJson).toOption.get
+      parse(str).right.flatMap(Decoder[ResponseBody].decodeJson).right.get
   }
 }
