@@ -9,7 +9,7 @@ akka-stream-apns uses the latest HTTP/2-based APNs provider API.
 ```scala
 resolvers += Resolver.bintrayRepo("reactivehub", "maven")
 
-libraryDependencies += "com.reactivehub" %% "akka-stream-apns" % "0.7"
+libraryDependencies += "com.reactivehub" %% "akka-stream-apns" % "0.8"
 ```
 
 ## Quick Start
