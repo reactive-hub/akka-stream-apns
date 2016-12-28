@@ -6,7 +6,7 @@ object Dependencies {
 
   val sprayJson         = "io.spray"          %% "spray-json"          % "1.3.2"
   val playJson          = "com.typesafe.play" %% "play-json"           % "2.5.10"
-  val liftJson          = "net.liftweb"       %% "lift-json"           % "2.6.3"
+  val liftJson          = "net.liftweb"       %% "lift-json"           % "3.0.1"
   val circeParser       = "io.circe"          %% "circe-parser"        % "0.5.3"
   val circeGeneric      = "io.circe"          %% "circe-generic"       % "0.5.3"
 

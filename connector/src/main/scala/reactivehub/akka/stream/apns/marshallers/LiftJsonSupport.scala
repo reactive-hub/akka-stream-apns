@@ -16,7 +16,7 @@ trait LiftJsonSupport {
     override def jsonArray(elements: Seq[JValue]): JValue = JArray(elements.toList)
     override def jsonObject(fields: Map[String, JValue]): JValue = JObject(fields.toList.map(kv ⇒ JField(kv._1, kv._2)))
     override def write[T](t: T, w: LiftWriter[T]): JValue = w.write(t)
-    override def print(value: JValue): ByteString = ByteString(compact(render(value)))
+    override def print(value: JValue): ByteString = ByteString(compactRender(value))
   }
 
   implicit def liftWriter[T](implicit f: Formats): LiftWriter[T] = new LiftWriter[T]
