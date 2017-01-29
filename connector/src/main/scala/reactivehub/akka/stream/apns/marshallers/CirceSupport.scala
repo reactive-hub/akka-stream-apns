@@ -22,7 +22,7 @@ trait CirceSupport {
   private[apns] object ResponseBodyDecoders {
     implicit val ReasonDecoder = instance { c ⇒
       for {
-        s ← c.focus.as[String].right
+        s ← c.as[String].right
         r ← parseReason(s).toRight(DecodingFailure("Reason", c.history)).right
       } yield r
     }
