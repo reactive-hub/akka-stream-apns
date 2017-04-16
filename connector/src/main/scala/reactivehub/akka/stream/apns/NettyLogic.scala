@@ -247,7 +247,7 @@ private[apns] abstract class NettyLogic[I, O: ClassTag](
         do {
           val p = ctx.newPromise()
           ctx.write(writeBuffer.dequeue(), p)
-          combiner.add(p)
+          combiner.add(p: ChannelFuture)
         } while (writeBuffer.nonEmpty && channel.isActive && channel.isWritable)
 
         if (channel.isActive) {

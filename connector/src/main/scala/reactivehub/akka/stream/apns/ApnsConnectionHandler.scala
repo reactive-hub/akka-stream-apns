@@ -1,7 +1,7 @@
 package reactivehub.akka.stream.apns
 
 import io.netty.buffer.ByteBuf
-import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
+import io.netty.channel.{ChannelFuture, ChannelHandlerContext, ChannelPromise}
 import io.netty.handler.codec.http2._
 import io.netty.util.concurrent.PromiseCombiner
 import io.netty.util.internal.ObjectUtil._
@@ -137,7 +137,7 @@ private[apns] final class ApnsConnectionHandler(
       }
 
       topic.foreach(topic ⇒ headers.add(HeaderTopic, topic))
-      
+
       collapseId.foreach(collapseId ⇒ headers.add(HeaderCollapseId, collapseId))
 
       val headersPromise = ctx.newPromise()
@@ -147,7 +147,7 @@ private[apns] final class ApnsConnectionHandler(
       encoder.writeData(ctx, streamId, buffer, 0, true, dataPromise)
 
       val promiseCombiner = new PromiseCombiner()
-      promiseCombiner.addAll(headersPromise, dataPromise)
+      promiseCombiner.addAll(headersPromise: ChannelFuture, dataPromise)
       promiseCombiner.finish(promise)
 
       val stream = conn.stream(streamId)
