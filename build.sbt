@@ -5,7 +5,7 @@ import scalariform.formatter.preferences._
 lazy val commonSettings = scalariformSettings ++ Seq(
   organization := "com.reactivehub",
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.11.8", "2.12.1"),
+  crossScalaVersions := Seq("2.11.10", "2.12.1"),
 
   scalacOptions := Seq(
     "-deprecation",
