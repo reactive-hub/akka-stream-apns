@@ -1,13 +1,13 @@
 package reactivehub.akka.stream.apns
 
-import akka.actor.{ExtendedActorSystem, Extension, ExtensionKey}
+import akka.actor._
 import akka.stream.scaladsl._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.handler.ssl.SslContext
 import java.net.InetSocketAddress
 import scala.concurrent.Future
 
-class ApnsExt(implicit system: ExtendedActorSystem) extends Extension {
+class ApnsExt(system: ExtendedActorSystem) extends Extension {
   /**
     * Creates a Flow representing a prospective connection to APNs.
     */
@@ -23,4 +23,11 @@ class ApnsExt(implicit system: ExtendedActorSystem) extends Extension {
     Flow.fromGraph(NioApnsClientStage(remoteAddress, sslContext, group))
 }
 
-object ApnsExt extends ExtensionKey[ApnsExt]
+object ApnsExt extends ExtensionId[ApnsExt] with ExtensionIdProvider {
+  override def lookup(): ExtensionId[_ <: Extension] = ApnsExt
+
+  override def createExtension(system: ExtendedActorSystem): ApnsExt =
+    new ApnsExt(system)
+
+  override def get(system: ActorSystem): ApnsExt = super.get(system)
+}
